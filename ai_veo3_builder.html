@@ -27,7 +27,8 @@
             overflow: hidden;
             display: grid;
             grid-template-rows: auto 1fr;
-            height: 95vh;
+            height: calc(100vh - 40px);
+            min-height: 600px;
         }
 
         .header {
@@ -56,6 +57,23 @@
             padding: 20px;
             overflow-y: auto;
             border-right: 1px solid #e9ecef;
+            max-height: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
         }
 
         .center-panel {
@@ -168,7 +186,24 @@
             padding: 20px;
             overflow-y: auto;
             background: white;
-            max-height: calc(100vh - 300px);
+            max-height: calc(100vh - 250px);
+            min-height: 200px;
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
         }
 
         .message {
@@ -234,6 +269,23 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .components-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .components-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .components-panel::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
         }
 
         .component-group {
@@ -344,10 +396,20 @@
             
             .container {
                 height: auto;
+                min-height: auto;
+            }
+            
+            .sidebar, .components-panel, .chat-messages {
+                max-height: 400px;
+                min-height: 200px;
             }
             
             .chat-messages {
                 max-height: 300px;
+            }
+            
+            body {
+                padding: 10px;
             }
         }
     </style>
