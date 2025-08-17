@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+veo3_env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# API Keys (security)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.json
+secrets.json
+
+# Temporary files
+*.tmp
+*.temp
+get-pip.py
+
+# Generated files
+demo_veo3_prompt.json
+output/
+exports/
+
+# Dependencies
+node_modules/
+
+# Streamlit
+.streamlit/

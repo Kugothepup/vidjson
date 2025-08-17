@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veo3 JSON Prompt Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab.active {
+            background: white;
+            color: #2c3e50;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 70vh;
+            min-height: 500px;
+        }
+
+        .chat-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            max-height: calc(70vh - 150px);
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+        }
+
+        .user-message {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+
+        .ai-message {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .json-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .copy-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: #229954;
+        }
+
+        .reference-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .reference-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .reference-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .reference-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .reference-item h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .reference-item p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .api-key-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .api-help {
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Veo3 JSON Prompt Builder</h1>
+            <p>Interactive AI-powered tool for creating structured video prompts</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('builder')">Prompt Builder</div>
+            <div class="tab" onclick="switchTab('reference')">Camera Reference</div>
+            <div class="tab" onclick="switchTab('guide')">Best Practices</div>
+        </div>
+
+        <div id="builder" class="tab-content active">
+            <div class="api-key-section">
+                <label for="apiKey"><strong>Mistral API Key:</strong></label>
+                <input type="password" id="apiKey" class="api-key-input" placeholder="Enter your Mistral API key to start building prompts">
+                <div class="api-help">
+                    Get your free API key at <a href="https://console.mistral.ai/" target="_blank">console.mistral.ai</a>. Your key is stored locally and never sent to our servers.
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-section">
+                    <div class="chat-header">💬 AI Assistant</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            Hi! I'm here to help you create a structured JSON prompt for Veo3. 
+                            <br><br>
+                            To get started, please describe the video you want to create. I'll ask you questions to build a comprehensive JSON prompt with all the technical details Veo3 needs.
+                            <br><br>
+                            What kind of video would you like to generate?
+                        </div>
+                    </div>
+                    <div class="input-container">
+                        <input type="text" class="chat-input" id="userInput" placeholder="Describe your video idea..." onkeypress="handleKeyPress(event)">
+                        <button class="send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+
+                <div class="chat-section">
+                    <div class="chat-header">📋 Generated JSON</div>
+                    <div class="json-output" id="jsonOutput">{
+  "prompt": "Your structured prompt will appear here as we build it together",
+  "caption": "Brief video summary (max 30 words)",
+  "file_name": "video.mp4",
+  "input_image_urls": [],
+  "input_ids": []
+}</div>
+                    <button class="copy-btn" onclick="copyJSON()">Copy JSON</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="guide" class="tab-content">
+            <div class="reference-grid">
+                <div class="reference-section">
+                    <h3>🎯 8-Component Framework</h3>
+                    
+                    <div class="reference-item">
+                        <h4>1. Subject</h4>
+                        <p>Detailed character/object description: age, appearance, wardrobe, emotional state</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>2. Action</h4>
+                        <p>Single clear beat of action with vivid verbs and micro-expressions</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>3. Scene/Context</h4>
+                        <p>Environment: location, time of day, weather, key props</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>4. Style</h4>
+                        <p>Visual aesthetic: film genres, artistic movements, technical qualities</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>5. Camera</h4>
+                        <p>Movement: static, pan, dolly, tracking, crane, handheld</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>6. Composition</h4>
+                        <p>Framing: wide shot, medium shot, close-up, extreme close-up</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>7. Ambiance</h4>
+                        <p>Lighting and color tone: soft north-light, Rembrandt lighting, sunset orange</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>8. Audio</h4>
+                        <p>All sound elements: dialogue, ambient noise, sound effects, music</p>
+                    </div>
+                </div>
+
+                <div class="reference-section">
+                    <h3>🎤 Audio Generation Tips</h3>
+                    
+                    <div class="reference-item">
+                        <h4>Dialogue Syntax</h4>
+                        <p><strong>Correct:</strong> The woman says: "Let's go."<br>
+                        <strong>Wrong:</strong> The woman says "Let's go." (causes subtitles)</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Multi-Character Dialogue</h4>
+                        <p>Clearly identify each speaker to avoid confusion in voice generation</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Sound Effects</h4>
+                        <p>Layer descriptions: ambient noise + action-sync effects + background music</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Prevent Audio Hallucinations</h4>
+                        <p>Explicitly define expected audio, even if silence or quiet room tone</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Emotional Tone</h4>
+                        <p>Specify vocal performance: whispered, shouted, melancholic, excited</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Complex Soundscapes</h4>
+                        <p>Example: "Audio: café murmur, coffee machine hiss, jazz piano in background"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reference" class="tab-content">
+            <div class="reference-grid">
+                <div class="reference-section">
+                    <h3>📷 Camera Lens Types</h3>
+                    
+                    <div class="reference-item">
+                        <h4>Wide Angle (14-24mm)</h4>
+                        <p>Great for landscapes, architecture, and establishing shots. Creates dramatic perspective and includes more of the scene.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Standard (35-50mm)</h4>
+                        <p>Natural perspective similar to human vision. Perfect for general purpose shooting and realistic scenes.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Portrait (85-135mm)</h4>
+                        <p>Ideal for close-ups and character focus. Creates natural compression and pleasing bokeh.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Telephoto (200mm+)</h4>
+                        <p>Strong compression effect, isolates subjects from background. Great for dramatic effect and distant subjects.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Macro</h4>
+                        <p>Extreme close-up capability for tiny subjects. Creates intimate, detailed perspectives.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Fisheye</h4>
+                        <p>Ultra-wide with distinctive curved distortion. Creates unique, immersive perspectives.</p>
+                    </div>
+                </div>
+
+                <div class="reference-section">
+                    <h3>🎬 Camera Angles & Movements</h3>
+                    
+                    <div class="reference-item">
+                        <h4>Eye Level</h4>
+                        <p>Natural, neutral perspective at subject's eye height. Most common and comfortable viewing angle.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Low Angle</h4>
+                        <p>Camera below subject looking up. Makes subjects appear powerful, heroic, or imposing.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>High Angle</h4>
+                        <p>Camera above subject looking down. Makes subjects appear vulnerable or diminished.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Bird's Eye</h4>
+                        <p>Directly overhead view. Great for showing layout, patterns, or creating unique perspective.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Dutch Angle</h4>
+                        <p>Tilted camera creating diagonal horizon. Adds tension, unease, or dynamic energy.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Tracking Shot</h4>
+                        <p>Camera follows subject's movement. Creates smooth, cinematic motion. Use Steadicam for stability.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Dolly Shot</h4>
+                        <p>Camera physically moves toward/away from subject. Creates dramatic depth and scale changes.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Crane Shot</h4>
+                        <p>Sweeping vertical movement. Reveals scale and creates epic, cinematic moments.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Handheld</h4>
+                        <p>Natural, documentary-style movement. Adds intimacy and realism to scenes.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Dolly Zoom (Vertigo Effect)</h4>
+                        <p>Dolly in while zooming out (or vice versa). Creates disorienting psychological effect.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Pan/Tilt</h4>
+                        <p>Horizontal (pan) or vertical (tilt) camera rotation. Reveals environment or follows action.</p>
+                    </div>
+                    
+                    <div class="reference-item">
+                        <h4>Static Shot</h4>
+                        <p>No camera movement. Focuses attention on subject performance and composition.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPrompt = {
+            prompt: "",
+            caption: "",
+            file_name: "video.mp4",
+            input_image_urls: [],
+            input_ids: []
+        };
+
+        let promptComponents = {
+            subject: "",
+            action: "",
+            scene: "",
+            style: "cinematic, photorealistic",
+            camera: "",
+            composition: "",
+            ambiance: "",
+            audio: ""
+        };
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!message) return;
+            
+            if (!apiKey) {
+                alert('Please enter your Mistral API key first.');
+                return;
+            }
+
+            addMessage(message, 'user');
+            input.value = '';
+
+            try {
+                const response = await callMistralAPI(message, apiKey);
+                addMessage(response, 'ai');
+                
+                if (response.includes('```json')) {
+                    updateJSON(extractJSON(response));
+                }
+            } catch (error) {
+                addMessage('Sorry, there was an error connecting to the AI. Please check your API key and try again.', 'ai');
+                console.error('Error:', error);
+            }
+        }
+
+        async function callMistralAPI(message, apiKey) {
+            const context = `You are an expert video production assistant specializing in creating structured JSON prompts for Veo3 AI video generation using the official API format.
+
+Veo3 requires a JSON with these exact fields:
+- "prompt": Vivid scene description with 8 components (Subject, Action, Scene, Style, Camera, Composition, Ambiance, Audio)
+- "caption": One-sentence summary (max 30 words)
+- "file_name": Descriptive name ending in .mp4 (max 20 chars)
+- "input_image_urls": Array of reference image URLs (empty if none)
+- "input_ids": Array of generated image IDs (empty if none)
+
+For AUDIO generation (Veo3's key feature):
+- Use proper dialogue syntax: Character says: "dialogue" (colon prevents subtitles)
+- Specify ambient sounds, sound effects, and music
+- Be explicit about audio to prevent "audio hallucinations"
+
+For the PROMPT field, structure using these 8 components:
+1. Subject: Detailed character/object description
+2. Action: What they're doing (single clear beat)
+3. Scene: Location, time, weather, props
+4. Style: Visual aesthetic (film noir, Pixar-like, etc.)
+5. Camera: Movement (dolly, pan, tracking, static)
+6. Composition: Framing (wide shot, close-up, etc.)
+7. Ambiance: Lighting and color tone
+8. Audio: All sound elements
+
+Use precise filmmaking terminology. Ask 1-2 targeted questions to gather missing details.
+
+User request: "${message}"
+
+Help build a complete Veo3 JSON prompt following official best practices.`;
+
+            const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'mistral-large-latest',
+                    messages: [
+                        { role: 'system', content: context },
+                        { role: 'user', content: message }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function extractJSON(text) {
+            const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+            if (jsonMatch) {
+                try {
+                    return JSON.parse(jsonMatch[1]);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        function updateJSON(newPrompt) {
+            if (newPrompt) {
+                currentPrompt = { ...currentPrompt, ...newPrompt };
+                document.getElementById('jsonOutput').textContent = JSON.stringify(currentPrompt, null, 2);
+            }
+        }
+
+        function copyJSON() {
+            const jsonText = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#27ae60';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#27ae60';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
